@@ -253,28 +253,6 @@ void graficos() {
     SDL_Quit();
 }
 
-/*
-void gerarPontosAleatorios() {
-     for(uint8_t i = 0; i < N; i++) {
-
-        // Aleatorio
-        std::mt19937_64 rng;
-        uint64_t timeSeed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-        std::seed_seq ss{uint32_t(timeSeed & 0xffffffff), uint32_t(timeSeed>>32)};
-        rng.seed(ss);
-        std::uniform_real_distribution<double> unif(-20, 20);
-
-
-        Num r1 = unif(rng);
-        // consumir um tempo
-        for(int j = 0; j < 17; j++) {}
-        Num r2 = unif(rng);
-
-        pontos.push_back(Vetor::novo(r1, r2));
-        pontosBKP.push_back(Vetor::novo(r1, r2));
-    }
-}
-*/
 
 void menuzin() {
 	std::cout << "--------------------" << std::endl;
