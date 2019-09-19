@@ -49,8 +49,9 @@ struct vetor {
 
 
 
-Num N = 10;
+Num N = 4;
 std::vector<Vetor> pontos;
+std::vector<Vetor> pontosBKP;
 
 
 
@@ -69,9 +70,35 @@ const int cy = SCREEN_HEIGHT / 2;
 bool aberto = true;
 bool texto = true;
 
+uint64_t iteracaoAtual = 0;
+
 
 SDL_Window* window = nullptr;
 SDL_Renderer* renderer = nullptr;
+
+
+void gerarPontosAleatorios() {
+     pontos.clear();
+     pontosBKP.clear();
+     for(uint8_t i = 0; i < N; i++) {
+
+        // Aleatorio
+        std::mt19937_64 rng;
+        uint64_t timeSeed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+        std::seed_seq ss{uint32_t(timeSeed & 0xffffffff), uint32_t(timeSeed>>32)};
+        rng.seed(ss);
+        std::uniform_real_distribution<double> unif(-20, 20);
+
+
+        Num r1 = unif(rng);
+        // consumir um tempo
+        for(int j = 0; j < 17; j++) {}
+        Num r2 = unif(rng);
+
+        pontos.push_back(Vetor::novo(r1, r2));
+        pontosBKP.push_back(Vetor::novo(r1, r2));
+    }
+}
 
 
 
@@ -159,6 +186,34 @@ void graficos() {
             std::cout << "\n";
         }
 
+	 if (state[SDL_SCANCODE_2]) {
+            std::cout << "\n";
+	    printf("Config Atual:\n");
+      	    for(Num i = 0; i < N; i++) {
+                pontos[i].print();
+	    }
+            std::cout << "\n";
+         }
+
+	if (state[SDL_SCANCODE_R]) {
+            std::cout << "\n";
+   	    SDL_Delay(500);
+            printf("\nReiniciando para Conf Inicial:\n");
+	    pontos = pontosBKP;
+	    iteracaoAtual = 0;
+            std::cout << "\n";
+         }
+
+
+        if (state[SDL_SCANCODE_N]) {
+            std::cout << "\n";
+            SDL_Delay(500);
+            printf("\nGerando uma nova Configuração:\n");
+	    gerarPontosAleatorios();
+            iteracaoAtual = 0;
+            std::cout << "\n";
+         }
+
 
 
         SDL_RenderClear(renderer);
@@ -198,15 +253,9 @@ void graficos() {
     SDL_Quit();
 }
 
-
-
-
-
-
-int main() {
-
-
-    for(uint8_t i = 0; i < N; i++) {
+/*
+void gerarPontosAleatorios() {
+     for(uint8_t i = 0; i < N; i++) {
 
         // Aleatorio
         std::mt19937_64 rng;
@@ -215,18 +264,46 @@ int main() {
         rng.seed(ss);
         std::uniform_real_distribution<double> unif(-20, 20);
 
+
         Num r1 = unif(rng);
         // consumir um tempo
         for(int j = 0; j < 17; j++) {}
         Num r2 = unif(rng);
 
         pontos.push_back(Vetor::novo(r1, r2));
-
+        pontosBKP.push_back(Vetor::novo(r1, r2));
     }
+}
+*/
+
+void menuzin() {
+	std::cout << "--------------------" << std::endl;
+	std::cout << ">> Zoom +:       [+]" << std::endl;
+	std::cout << ">> Zoom -:       [-]" << std::endl;
+	std::cout << ">> Reload Conf.: [r]" << std::endl;
+	std::cout << ">> New Conf.:    [n]" << std::endl;
+	std::cout << ">> Distances:    [1]" << std::endl;
+	std::cout << ">> Positions:    [2]" << std::endl;
+	std::cout << "--------------------\n\n" << std::endl;
+
+}
+
+int main() {
+
+    menuzin();
+
+    gerarPontosAleatorios();
+
+    printf("Config Inicial:\n");
+    for(Num i = 0; i < N; i++) {
+        pontos[i].print();
+    }
+    printf("\n");
+
 
     std::thread grafico(graficos);
 
-    SDL_Delay(500);
+    SDL_Delay(1000);
 
 
     Num maior;
@@ -234,8 +311,8 @@ int main() {
     std::cout << "\n";
     std::cout << "\n";
     std::cout << it << "\n";
-    for(uint64_t i = 0; i < it && aberto; i++) {
-        std::cout << "\r" << i;
+    for(iteracaoAtual = 0; iteracaoAtual < it && aberto; iteracaoAtual++) {
+        std::cout << "\r" << iteracaoAtual;
 
         for(Num j = 0; j < N; j++) {
             for(Num k = 0; k < N; k++) {
@@ -249,16 +326,20 @@ int main() {
         }
 
 
-        //for(int j = 0; j < N; j++) {
-        //    if(pontos[j].norma() > 2000) {
-        //        for(int n  = 0; n < N; n++) {
-        //            pontos[n].escalar(0.995);
-        //        }
-        //        break;
-        //    }
-        //}
+        for(int j = 0; j < N; j++) {
+           if(pontos[j].norma() > 20) {
+               for(int n  = 0; n < N; n++) {
+                   pontos[n].escalar(0.999);
+               }
+               break;
+           }
+        }
 
-        //SDL_Delay(1);
+
+
+        
+
+        SDL_Delay(1);
 
     }
 
